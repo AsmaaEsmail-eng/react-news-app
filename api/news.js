@@ -1,23 +1,16 @@
 export default async function handler(request) {
   try {
-    const url = new URL(request.url);
+    const { searchParams } = new URL(request.url);
 
-    const category = url.searchParams.get("category") || "general";
-    const search = url.searchParams.get("search") || "";
+    const category = searchParams.get("category") || "general";
+    const search = searchParams.get("search") || "";
 
     const apiKey = process.env.GNEWS_API_KEY;
 
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({
-          error: "GNEWS_API_KEY is missing",
-        }),
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      return Response.json(
+        { error: "GNEWS_API_KEY is missing" },
+        { status: 500 }
       );
     }
 
@@ -47,23 +40,22 @@ export default async function handler(request) {
 
     const data = await response.json();
 
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: error.message,
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
+    if (!response.ok) {
+      return Response.json(
+        {
+          error:
+            data.errors?.join(", ") ||
+            "GNews API error",
         },
-      }
+        { status: response.status }
+      );
+    }
+
+    return Response.json(data);
+  } catch (error) {
+    return Response.json(
+      { error: error.message },
+      { status: 500 }
     );
   }
 }
