@@ -1,18 +1,25 @@
-export default async function handler(req, res) {
+export default async function handler(request) {
   try {
-    const { category = "general", search = "" } = req.query;
+    const url = new URL(request.url);
+
+    const category = url.searchParams.get("category") || "general";
+    const search = url.searchParams.get("search") || "";
 
     const apiKey = process.env.GNEWS_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({
-        error: "GNEWS_API_KEY is missing",
-      });
+      return new Response(
+        JSON.stringify({
+          error: "GNEWS_API_KEY is missing",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
-
-    const endpoint = search.trim()
-      ? "search"
-      : "top-headlines";
 
     const params = new URLSearchParams({
       lang: "en",
@@ -21,14 +28,16 @@ export default async function handler(req, res) {
       apikey: apiKey,
     });
 
+    let endpoint;
+
     if (search.trim()) {
+      endpoint = "search";
       params.set("q", search.trim());
     } else {
+      endpoint = "top-headlines";
       params.set(
         "category",
-        category === "all"
-          ? "general"
-          : category.toLowerCase()
+        category === "all" ? "general" : category.toLowerCase()
       );
     }
 
@@ -38,18 +47,23 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error:
-          data.errors?.join(", ") ||
-          "GNews API error",
-      });
-    }
-
-    return res.status(200).json(data);
-  } catch (error) {
-    return res.status(500).json({
-      error: error.message,
+    return new Response(JSON.stringify(data), {
+      status: response.status,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        error: error.message,
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
 }
