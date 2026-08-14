@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-const API_KEY = import.meta.env.VITE_GNEWS_API_KEY;
-
 function useNews(category = "all", searchTerm = "") {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,59 +13,34 @@ function useNews(category = "all", searchTerm = "") {
         setLoading(true);
         setError(null);
 
-        let url;
+        const selectedCategory =
+          category === "all"
+            ? "general"
+            : category.toLowerCase();
+
+        const params = new URLSearchParams();
 
         if (searchTerm.trim()) {
-          const query = encodeURIComponent(searchTerm.trim());
-
-          url =
-            `https://gnews.io/api/v4/search` +
-            `?q=${query}` +
-            `&lang=en` +
-            `&country=us` +
-            `&max=20` +
-            `&apikey=${API_KEY}`;
+          params.append("search", searchTerm.trim());
         } else {
-          const selectedCategory =
-            category === "all"
-              ? "general"
-              : category.toLowerCase();
-
-          url =
-            `https://gnews.io/api/v4/top-headlines` +
-            `?category=${selectedCategory}` +
-            `&lang=en` +
-            `&country=us` +
-            `&max=20` +
-            `&apikey=${API_KEY}`;
+          params.append("category", selectedCategory);
         }
 
-        // ننتظر ثانية قبل الطلب
         await new Promise((resolve) =>
-          setTimeout(resolve, 1000)
+          setTimeout(resolve, 500)
         );
 
         if (cancelled) return;
 
-        let response = await fetch(url);
-
-        // لو حصل 429 نستنى ونحاول مرة تانية
-        if (response.status === 429) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, 3000)
-          );
-
-          if (cancelled) return;
-
-          response = await fetch(url);
-        }
+        const response = await fetch(
+          `/api/news?${params.toString()}`
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data.errors?.join(", ") ||
-              "Failed to load news"
+            data.error || "Failed to load news"
           );
         }
 
