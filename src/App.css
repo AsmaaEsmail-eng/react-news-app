@@ -1,0 +1,110 @@
+/* =========================
+   HEADER
+========================= */
+
+.site-header {
+  background: #111827;
+  color: white;
+  padding: 24px 40px;
+}
+
+.header-container {
+  max-width: 1180px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  color: #4f8cff;
+}
+
+.header-tagline {
+  color: #aeb8ca;
+  font-size: 14px;
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1180px;
+  margin: auto;
+  padding: 14px 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  padding: 9px 15px;
+  border-radius: 8px;
+
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.nav-link:hover {
+  background: #eef4ff;
+  color: #356fe8;
+}
+
+.favorites-link {
+  margin-left: 8px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 650px) {
+
+  .site-header {
+    padding: 20px 15px;
+  }
+
+  .header-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .logo {
+    font-size: 26px;
+  }
+
+  .nav-container {
+    padding: 10px;
+    gap: 4px;
+  }
+
+  .nav-link {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+}
