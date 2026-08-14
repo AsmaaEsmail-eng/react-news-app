@@ -10,34 +10,39 @@ export default async function handler(req, res) {
       });
     }
 
-    let url;
+    const endpoint = search.trim()
+      ? "search"
+      : "top-headlines";
+
+    const params = new URLSearchParams({
+      lang: "en",
+      country: "us",
+      max: "10",
+      apikey: apiKey,
+    });
 
     if (search.trim()) {
-      const query = encodeURIComponent(search.trim());
-
-      url =
-        `https://gnews.io/api/v4/search` +
-        `?q=${query}` +
-        `&lang=en` +
-        `&country=us` +
-        `&max=10` +
-        `&apikey=${apiKey}`;
+      params.set("q", search.trim());
     } else {
-      url =
-        `https://gnews.io/api/v4/top-headlines` +
-        `?category=${category}` +
-        `&lang=en` +
-        `&country=us` +
-        `&max=10` +
-        `&apikey=${apiKey}`;
+      params.set(
+        "category",
+        category === "all"
+          ? "general"
+          : category.toLowerCase()
+      );
     }
 
-    const response = await fetch(url);
+    const response = await fetch(
+      `https://gnews.io/api/v4/${endpoint}?${params.toString()}`
+    );
+
     const data = await response.json();
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: data.errors?.join(", ") || "GNews API error",
+        error:
+          data.errors?.join(", ") ||
+          "GNews API error",
       });
     }
 
